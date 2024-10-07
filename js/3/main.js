@@ -176,7 +176,7 @@ _scene.add(_ambiLight);
 
 
 //point light lyser ud fra alle dens retninger
-const _pointLight = new THREE.PointLight(0xffffff, 50);
+const _pointLight = new THREE.PointLight(0xffffff, 30);
 _pointLight.castShadow = true;
 _pointLight.position.set(0,4,0);
 _pointLight.shadow.mapSize.width = 512 * 4;
@@ -194,12 +194,21 @@ _floorTexture.rotation = Math.PI / 2; // 90 grader i radianer
 const _floorMat = new THREE.MeshPhongMaterial({color:0xFFFFFF, map:_floorTexture, side: THREE.DoubleSide});
 const _floor = new THREE.Mesh(_floorGeom,_floorMat);
 _floor.rotation.x = dtr(-90);
-// _floor.position.z = -350;
+_floor.position.z = -370;
 
 _floor.receiveShadow = true;
 _scene.add(_floor);
 
-
+//byg sphere
+function buildSphere(x,y,z) {
+    const _geometry = new THREE.SphereGeometry(50,7,7);
+    const _material = new THREE.MeshBasicMaterial({color:0xffffff, fog: false});
+    var _sphere = new THREE.Mesh(_geometry,_material);
+    _sphere.position.set(x,y,z);
+    _scene.add(_sphere);
+    return _sphere;
+}
+buildSphere(0,0,-300);
 
 // Seeded random function
 function seededRandomGenerator(seed) {
@@ -209,11 +218,10 @@ function seededRandomGenerator(seed) {
     };
 }
 
-let seed = 47;
+let seed = 55;
 const seededRandom = seededRandomGenerator(seed);
 
-
-//load 3D model TREE
+//load 3D    model TREE
 var _3dmodel; // Declare the 3D model variable
 var _mixer; // Declare the animation variable
 var _animationSetting = {speed:1};
@@ -225,7 +233,7 @@ const loader = new GLTFLoader().setPath( '/examples/models/gltf/' );
     _3dmodel = gltf.scene;
     _3dmodel.scale.set(.02,.02,.02);
     
-    const _numModels = 80; // Number of models to place
+    const _numModels = 60; // Number of models to place
     const placedModels = []; // Array to store positions of placed models
 
     for (var i = 0; i < _numModels; i++) {
@@ -234,8 +242,8 @@ const loader = new GLTFLoader().setPath( '/examples/models/gltf/' );
 
         // Keep trying to generate a valid position until the minimum distance is satisfied
         while (!validPosition) {
-            _x = seededRandom() * 50 - 25; // Narrower range for X-axis
-            _z = seededRandom() * 500 - 200; // Wider range for Z-axis
+            _x = seededRandom() * 100 - 50; // Narrower range for X-axis
+            _z = seededRandom() * 300 - 270; // Wider range for Z-axis
 
             validPosition = true; // Assume position is valid unless proven otherwise
 
@@ -265,20 +273,117 @@ const loader = new GLTFLoader().setPath( '/examples/models/gltf/' );
     }
 });
 
+const shrekLoader = new GLTFLoader().setPath('/examples/models/gltf/');
+shrekLoader.load('alien_plant_shrek.glb', function (gltf) {
+    // Load, scale, and position the 3D model
+    const _shrek3dmodel = gltf.scene;
+    _shrek3dmodel.scale.set(10, 10, 10); // Adjust scale as needed
+    
+    const _numModels = 30; // Number of models to place
+    const placedModels = []; // Array to store positions of placed models
 
+    for (let i = 0; i < _numModels; i++) {
+        let validPosition = false;
+        let _x, _z;
+
+        // Keep trying to generate a valid position until the minimum distance is satisfied
+        while (!validPosition) {
+            _x = seededRandom() * 100 - 50; // X-axis range (-50 to 50)
+            _z = seededRandom() * 300 - 270; // Z-axis range (-270 to 30)
+
+            validPosition = true; // Assume position is valid unless proven otherwise
+
+            // Check if this position is at least 10 units away from every other placed model
+            for (let j = 0; j < placedModels.length; j++) {
+                const dx = _x - placedModels[j].x;
+                const dz = _z - placedModels[j].z;
+                const distance = Math.sqrt(dx * dx + dz * dz);
+
+                if (distance < 10) {
+                    validPosition = false; // Too close to another model, try again
+                    break;
+                }
+            }
+        }
+
+        // Save the valid position for future distance checks
+        placedModels.push({ x: _x, z: _z });
+
+        // Create a new instance of the model at the valid position
+        const _shrekModelInstance = _shrek3dmodel.clone(); //Correct variable reference
+        _shrekModelInstance.position.set(_x, -0.8, _z); // Set the position on X and Z axis
+        _shrekModelInstance.rotation.y = Math.random() * Math.PI; // Set a random rotation on Y axis
+
+        // Add the instance to the scene
+        _scene.add(_shrekModelInstance);
+    }
+});
+
+const mushroomLoader = new GLTFLoader().setPath('/examples/models/gltf/');
+const positions = [
+    { x: -10, z: -20 },
+    { x: 15, z: 5 },
+    { x: -30, z: 12 },
+    { x: 25, z: -25 },
+    { x: 0, z: -30 },
+    { x: 5, z: 10 },
+    { x: -15, z: 15 },
+    { x: 20, z: -10 },
+    { x: -5, z: -5 },
+    { x: 10, z: -15 },
+    { x: 30, z: 20 },
+    { x: -25, z: 25 },
+    { x: 10, z: 10 },
+    { x: -20, z: -20 },
+    { x: 15, z: 0 },
+    { x: 0, z: 20 },
+    { x: -10, z: 10 },
+    { x: 25, z: -5 },
+    { x: 10, z: -30 },
+    { x: -5, z: 5 },
+    { x: 30, z: -20 },
+];
+
+mushroomLoader.load('magical_mushroom_blue.glb', function (gltf) {
+    const mushroomModel = gltf.scene; // The loaded model
+    mushroomModel.scale.set(0.01, 0.01, 0.01); // Adjust the scale factors as needed
+
+    // Create a glowing material
+    const glowingMaterial = new THREE.MeshStandardMaterial({
+        color: 0x0036A7, // White color
+        emissive: 0x00B1FF,
+        emissiveIntensity: 0.5 // Intensity of the glow
+    });
+
+    // Iterate through the array of positions
+    for (const pos of positions) {
+        const mushroomInstance = mushroomModel.clone(); // Clone the model
+        mushroomInstance.position.set(pos.x, 1, pos.z); // Set the position
+        
+        // Traverse the mushroom instance to apply the glowing material
+        mushroomInstance.traverse((child) => {
+            if (child.isMesh) {
+                // Apply the glowing material to each mesh
+                child.material = glowingMaterial;
+            }
+        });
+
+        _scene.add(mushroomInstance); // Add to the scene
+    }
+});
 
 // Load grass with random positions
 loader.load('low_poly_grass.glb', function (gltf) {
     const grassModel = gltf.scene;
-    grassModel.scale.set(0.01, 0.01, 0.01); // Adjusted scale
+    grassModel.scale.set(0.006, 0.006, 0.006); // Adjusted scale
 
     const numGrass = 100;
 
     for (let i = 0; i < numGrass; i++) {
         // Generate fully random positions without a seed
-        const _x = Math.random() * 400 - 200; // Random x value within the range
-        const _z = Math.random() * -100;      // Random z value within the range
-        const y = -6; // Grass should be placed on the ground, so y is set to 0
+        const _x = Math.random() * 100 - 50; // Random x value within the range
+        const _z = Math.random() * 300 - 270;      // Random z value within the range
+        const y = -4; // Grass should be placed on the ground, so y is set to 0
 
         // Clone the grass model and place it at the generated position
         const grassInstance = grassModel.clone();
@@ -289,7 +394,16 @@ loader.load('low_poly_grass.glb', function (gltf) {
     }
 });
 
+var _lab3dmodel;
 
+const _labLoader = new GLTFLoader().setPath('/examples/models/gltf/');
+    _labLoader.load('tunnel_lab.glb', function(gltf){
+        //places, scales
+        _lab3dmodel = gltf.scene;
+        _lab3dmodel.scale.set(2.1,2.1,2.1),
+        _lab3dmodel.position.set(0,0,-8);
+        _scene.add(_lab3dmodel)
+    });
 
 gsap.ticker.add(animate);
 
@@ -352,7 +466,7 @@ function animate(){
 
 
 //opsætte GUI
-const gui = new GUI();
+// const gui = new GUI();
 
 //create folder for camera
 // const _folderca = gui.addFolder("Camera position");
