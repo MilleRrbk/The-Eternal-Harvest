@@ -42,6 +42,105 @@ _renderer.setPixelRatio(window.devicePixelRatio); //samme opløsning som brugere
 _renderer.shadowMap.enabled = true; //gør det muligt at se skygger
 _renderer.shadowMap.type = THREE.PCFShadowMap; //default PCF shadowmap
 
+//Audio listener
+const _listener = new THREE.AudioListener();
+_camera.add(_listener); //attach listener to camera
+
+//Audio source
+const _bgMusic = new THREE.Audio(_listener);
+
+//load mp3 file
+const _audioLoader = new THREE.AudioLoader();
+_audioLoader.load('/examples/sounds/alien_planet_echoes.mp3', function(buffer){
+    _bgMusic.setBuffer(buffer);
+    _bgMusic.setLoop(true); //loop the audio
+    _bgMusic.setVolume(0.9); //adjust volume (0.0 - 0.1)
+    _bgMusic.play(); //play audio
+});
+
+
+
+//Initialize PointerLockControls - allows the camera to capture the mouse movement, enabling the user to look around freely
+const _controls = new PointerLockControls(_camera, document.body);
+
+//add the controls to the scene
+_scene.add(_controls.object);
+
+//pointer lock event listeners
+const _blocker = document.getElementById('_blocker');// Optional: an overlay to block view before entering
+const _instructions = document.getElementById('_instructions');// Instructions to click to start
+
+_instructions.addEventListener('click', () => {
+    _controls.lock();
+});
+
+_controls.addEventListener('lock', () => {
+    _instructions.style.display = 'none';
+    _blocker.style.display = 'none';
+});
+
+_controls.addEventListener('unlock', () => {
+    _blocker.style.display = 'block';
+    _instructions.style.display = '';
+});
+
+const _velocity = new THREE.Vector3();
+const _cameraDirection = new THREE.Vector3();
+const _moveSpeed = 400.0; 
+const _friction = 10.0;
+
+// Create an object to track which keys are being pressed
+const keys = {
+    forward: false,
+    backward: false,
+    left: false,
+    right: false
+};
+
+// Add an event listener for when any key is pressed
+document.addEventListener('keydown', (event) => {
+  // Check which key was pressed and update the corresponding key in the `keys` object
+    switch(event.code) {
+        case 'ArrowUp':
+        case 'KeyW':
+            keys.forward = true;
+            break;
+        case 'ArrowLeft':
+        case 'KeyA':
+            keys.left = true;
+            break;
+        case 'ArrowDown':
+        case 'KeyS':
+            keys.backward = true;
+            break;
+        case 'ArrowRight':
+        case 'KeyD':
+            keys.right = true;
+            break;
+    }
+}, false);
+
+document.addEventListener('keyup', (event) => {
+    switch (event.code) {
+        case 'ArrowUp':
+        case 'KeyW':
+            keys.forward = false;
+            break;
+        case 'ArrowLeft':
+        case 'KeyA':
+            keys.left = false;
+            break;
+        case 'ArrowDown':
+        case 'KeyS':
+            keys.backward = false;
+            break;
+        case 'ArrowRight':
+        case 'KeyD':
+            keys.right = false;
+            break;
+    }
+}, false);
+
 //initiate effect composer
 const _composer = new EffectComposer(_renderer);
 //capture scene
@@ -103,15 +202,18 @@ _scene.add(_floor);
 
 
 // Seeded random function
-function seededRandom(seed) {
-    var x = Math.sin(seed++) * 10000;
-    return x - Math.floor(x);
+function seededRandomGenerator(seed) {
+    return function() {
+        const x = Math.sin(seed++) * 10000;
+        return x - Math.floor(x);
+    };
 }
-// Define your seed (use the same seed to get the same random numbers each time)
-var seed = 42; // You can change this seed to any number
+
+let seed = 47;
+const seededRandom = seededRandomGenerator(seed);
 
 
-//load 3D model
+//load 3D model TREE
 var _3dmodel; // Declare the 3D model variable
 var _mixer; // Declare the animation variable
 var _animationSetting = {speed:1};
@@ -132,9 +234,9 @@ const loader = new GLTFLoader().setPath( '/examples/models/gltf/' );
 
         // Keep trying to generate a valid position until the minimum distance is satisfied
         while (!validPosition) {
-            _x = Math.random(seed) * 400 - 200; // Random x value
-            _z = Math.random(seed) * -100; // Random z value
-            
+            _x = seededRandom() * 50 - 25; // Narrower range for X-axis
+            _z = seededRandom() * 500 - 200; // Wider range for Z-axis
+
             validPosition = true; // Assume position is valid unless proven otherwise
 
             // Check if this position is at least 10 units away from every other placed model
@@ -163,16 +265,85 @@ const loader = new GLTFLoader().setPath( '/examples/models/gltf/' );
     }
 });
 
+
+
+// Load grass with random positions
+loader.load('low_poly_grass.glb', function (gltf) {
+    const grassModel = gltf.scene;
+    grassModel.scale.set(0.01, 0.01, 0.01); // Adjusted scale
+
+    const numGrass = 100;
+
+    for (let i = 0; i < numGrass; i++) {
+        // Generate fully random positions without a seed
+        const _x = Math.random() * 400 - 200; // Random x value within the range
+        const _z = Math.random() * -100;      // Random z value within the range
+        const y = -6; // Grass should be placed on the ground, so y is set to 0
+
+        // Clone the grass model and place it at the generated position
+        const grassInstance = grassModel.clone();
+        grassInstance.position.set(_x, y, _z);
+
+        // Add the grass instance to the scene
+        _scene.add(grassInstance);
+    }
+});
+
+
+
 gsap.ticker.add(animate);
 
 var _d = 0;//deltaratio
-var _clock = new THREE.Clock();
-var _direction = 0;
+
+// Movement parameters
+const moveSpeed = 100.0; // Units per second
+const friction = 10.0; // Friction coefficient
+
+// Velocity and direction vectors
+const velocity = new THREE.Vector3();
+const direction = new THREE.Vector3();
+
+// Clock to track time
+const clock = new THREE.Clock();
+
 
 function animate(){
-    _d = gsap.ticker.deltaRatio(60); //matcher op imod 60 fps - alle får samme hastighed på deres animation
-
-    _stars.rotation.y += .0001 * _d;
+        // Calculate delta ratio based on target FPS (60)
+        _d = gsap.ticker.deltaRatio(60); // Ensures consistent movement speed
+    
+        // Rotate the stars
+        _stars.rotation.y += 0.0001 * _d;
+    
+        // Update movement based on keys pressed
+        direction.set(0, 0, 0);
+    
+        if (keys.forward) direction.z -= 1;
+        if (keys.backward) direction.z += 1;
+        if (keys.left) direction.x -= 1;
+        if (keys.right) direction.x += 1;
+    
+        direction.normalize(); // Ensure consistent movement speed
+    
+        if (keys.forward || keys.backward) velocity.z -= direction.z * moveSpeed * _d * (1/60);
+        if (keys.left || keys.right) velocity.x -= direction.x * moveSpeed * _d * (1/60);
+    
+        // Apply friction (to ensure full stop when keyup)
+        velocity.x -= velocity.x * friction * _d * (1/60);
+        velocity.z -= velocity.z * friction * _d * (1/60);
+    
+        // Calculate the camera's direction
+        _camera.getWorldDirection(_cameraDirection);
+        _cameraDirection.y = 0; // Prevent camera from moving up/down
+        _cameraDirection.normalize();
+    
+        // Calculate the right vector
+        const right = new THREE.Vector3();
+        right.crossVectors(_camera.up, _cameraDirection).normalize();
+    
+        // Move the camera
+        _controls.object.position.addScaledVector(_cameraDirection, velocity.z * _d * (1/60));
+        _controls.object.position.addScaledVector(right, velocity.x * _d * (1/60));
+    
 
     _composer.render(); //render screen med effekter
        
@@ -184,15 +355,15 @@ function animate(){
 const gui = new GUI();
 
 //create folder for camera
-const _folderca = gui.addFolder("Camera position");
-_folderca.add(_camera.position,'x',-10,10,.1);
-_folderca.add(_camera.position,'y',-10,10,.1);
-_folderca.add(_camera.position,'z',-10,10,.1);
+// const _folderca = gui.addFolder("Camera position");
+// _folderca.add(_camera.position,'x',-10,10,.1);
+// _folderca.add(_camera.position,'y',-10,10,.1);
+// _folderca.add(_camera.position,'z',-10,10,.1);
 
-const _folderrca = gui.addFolder("Camera rotation");
-_folderrca.add(_camera.rotation,'x', dtr(-180), dtr(180), .01);
-_folderrca.add(_camera.rotation,'y', dtr(-180), dtr(180), .01);
-_folderrca.add(_camera.rotation,'z', dtr(-180), dtr(180), .01);
+// const _folderrca = gui.addFolder("Camera rotation");
+// _folderrca.add(_camera.rotation,'x', dtr(-180), dtr(180), .01);
+// _folderrca.add(_camera.rotation,'y', dtr(-180), dtr(180), .01);
+// _folderrca.add(_camera.rotation,'z', dtr(-180), dtr(180), .01);
 
 //stars
 function createStars(){
@@ -274,5 +445,3 @@ function resized(e){
 
 window.addEventListener("resize", resized); // Lytter til ændringer i skærmstørrelsen (resize) og kalder resized-funktionen
 resized(null); // Kalder resized for første gang, så størrelsen er korrekt fra starten
-
-

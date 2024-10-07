@@ -1,31 +1,83 @@
 <!DOCTYPE html>
 <html lang="en">
-	<head>
-		<meta charset="utf-8">
-		<meta name="viewport" content="width=device-width,user-scalable=no,minimum-scale=1.0,maximum-scale=1.0">
-		<title>Three - DMJX</title>
-		<style>
-			html,body{margin:0;padding:0;width:100%;}
-			body{background:#FFF;overflow:hidden;}
-			#three{position:absolute;left:0;top:0;width:100%;height:100%;margin:0;padding:0;}
-		</style>
-	</head>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,user-scalable=no,minimum-scale=1.0,maximum-scale=1.0">
+	
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
 
-	<body>
-		<canvas id="three"></canvas> 
+	<link rel="stylesheet" href="styles.css">
+    <title>Three - DMJX</title>
+    <style>
+        /* Existing styles */
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+        }
+        body {
+            background: #FFF;
+            overflow: hidden;
+            position: relative; /* Needed for absolutely positioned children */
+        }
+        #three {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
 
-		<script type="importmap">
-			{
-				"imports": {
-					"three": "/build/three.module.js",
-					"three/examples/": "/examples/",
-					"three/addons/": "/examples/jsm/",
-					"lil-gui": "https://cdn.jsdelivr.net/npm/lil-gui@0.19.2/+esm"
-				}
-			}
-		</script>
-		<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.10.4/gsap.min.js"></script>
-		
-		<script type="module" src="/js/3/main.js" ></script>
-	</body>
+        /* New styles for blocker and instructions */
+        #_blocker {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1; /* Ensures it overlays the canvas */
+        }
+
+        
+    </style>
+</head>
+
+<body>
+    <!-- Blocker and Instructions Overlays -->
+    <div id="_blocker">
+        <div id="_instructions">
+             <br> You have landed on the exoplanet Vitalis, located 245 light years away from Earth. Advances in exploration technology have enabled humanity to cover vast distances at remarkable speeds. This mysterious planet, shrouded in secrets, holds the key to immortality, but it has been visited before. The echoes of past expeditions linger in the air, as the fates of those who sought its truths remain unknown. Your mission begins now.
+			 <br> <br>
+			 Click to play
+        </div>
+    </div>
+    
+    <!-- Three.js Canvas -->
+    <canvas id="three"></canvas> 
+
+    <!-- Import Maps and Scripts -->
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "/build/three.module.js",
+                "three/examples/": "/examples/",
+                "three/addons/": "/examples/jsm/",
+                "lil-gui": "https://cdn.jsdelivr.net/npm/lil-gui@0.19.2/+esm"
+            }
+        }
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.10.4/gsap.min.js"></script>
+    
+    <!-- Main JavaScript Module -->
+    <script type="module" src="/js/3/main.js"></script>
+</body>
 </html>
