@@ -199,10 +199,10 @@ _floor.position.z = -370;
 _floor.receiveShadow = true;
 _scene.add(_floor);
 
-//byg sphere
+//sun sphere
 function buildSphere(x,y,z) {
     const _geometry = new THREE.SphereGeometry(50,7,7);
-    const _material = new THREE.MeshBasicMaterial({color:0xffffff, fog: false});
+    const _material = new THREE.MeshBasicMaterial({color:0xFFF2B9, fog: false});
     var _sphere = new THREE.Mesh(_geometry,_material);
     _sphere.position.set(x,y,z);
     _scene.add(_sphere);
@@ -221,19 +221,18 @@ function seededRandomGenerator(seed) {
 let seed = 55;
 const seededRandom = seededRandomGenerator(seed);
 
-//load 3D    model TREE
+//main trees
 var _3dmodel; // Declare the 3D model variable
 var _mixer; // Declare the animation variable
 var _animationSetting = {speed:1};
 
 const loader = new GLTFLoader().setPath( '/examples/models/gltf/' );
-
 	loader.load( 'mushroom_tree1.glb', function ( gltf ) {
     //Loader, skalerer og placerer 3D modellen
     _3dmodel = gltf.scene;
     _3dmodel.scale.set(.02,.02,.02);
     
-    const _numModels = 60; // Number of models to place
+    const _numModels = 50; // Number of models to place
     const placedModels = []; // Array to store positions of placed models
 
     for (var i = 0; i < _numModels; i++) {
@@ -273,6 +272,7 @@ const loader = new GLTFLoader().setPath( '/examples/models/gltf/' );
     }
 });
 
+//shrek tree
 const shrekLoader = new GLTFLoader().setPath('/examples/models/gltf/');
 shrekLoader.load('alien_plant_shrek.glb', function (gltf) {
     // Load, scale, and position the 3D model
@@ -319,6 +319,7 @@ shrekLoader.load('alien_plant_shrek.glb', function (gltf) {
     }
 });
 
+//mushrooms
 const mushroomLoader = new GLTFLoader().setPath('/examples/models/gltf/');
 const positions = [
     { x: -10, z: -20 },
@@ -343,7 +344,6 @@ const positions = [
     { x: -5, z: 5 },
     { x: 30, z: -20 },
 ];
-
 mushroomLoader.load('magical_mushroom_blue.glb', function (gltf) {
     const mushroomModel = gltf.scene; // The loaded model
     mushroomModel.scale.set(0.01, 0.01, 0.01); // Adjust the scale factors as needed
@@ -372,7 +372,7 @@ mushroomLoader.load('magical_mushroom_blue.glb', function (gltf) {
     }
 });
 
-// Load grass with random positions
+//grass with random positions
 loader.load('low_poly_grass.glb', function (gltf) {
     const grassModel = gltf.scene;
     grassModel.scale.set(0.006, 0.006, 0.006); // Adjusted scale
@@ -394,34 +394,146 @@ loader.load('low_poly_grass.glb', function (gltf) {
     }
 });
 
-var _lab3dmodel;
+//satellite structure
+var _satellite3dmodel;
+const _satelliteLoader = new GLTFLoader().setPath('/examples/models/gltf/');
+_satelliteLoader.load('satellite.glb', function(gltf){
+    _satellite3dmodel = gltf.scene;
+    _satellite3dmodel.scale.set(1.5,1.5,1.5);
+    _satellite3dmodel.position.set(-23,0,-65);
+    _satellite3dmodel.rotation.y = dtr(-40);
 
+    _scene.add(_satellite3dmodel);
+})
+
+//control console
+var _controlroom3dmodel;
+const _controlroomLoader = new GLTFLoader().setPath('/examples/models/gltf/');
+_controlroomLoader.load('controlroom.glb', function(gltf){
+    _controlroom3dmodel = gltf.scene;
+    _controlroom3dmodel.scale.set(1.5,1.5,1.5);
+    _controlroom3dmodel.position.set(-25.6,0,-213.6);
+    _controlroom3dmodel.rotation.y = dtr(40);
+
+    _scene.add(_controlroom3dmodel);
+});
+
+//chair
+var _chair3dmodel;
+const _chairLoader = new GLTFLoader().setPath('/examples/models/gltf/');
+_controlroomLoader.load('chair.glb', function(gltf){
+    _chair3dmodel = gltf.scene;
+    _chair3dmodel.scale.set(1.5,1.5,1.5);
+    _chair3dmodel.position.set(-25.9,0,-209.7);
+    _chair3dmodel.rotation.y = dtr(100);
+
+    _scene.add(_chair3dmodel);
+});
+
+//controlroom (lab2)
+var _lab3dmodel2;
+const _labLoader2 = new GLTFLoader().setPath('/examples/models/gltf/');
+    _labLoader2.load('tunnel_lab.glb', function(gltf){
+        //places, scales
+        _lab3dmodel2 = gltf.scene;
+        _lab3dmodel2.scale.set(2.1,2.1,2.1),
+        _lab3dmodel2.position.set(-27,0,-218);
+        _lab3dmodel2.rotation.y = dtr(20);
+        _scene.add(_lab3dmodel2);
+    });
+
+//note 1
+var _paper3dmodel1;
+const _paper1Loader = new GLTFLoader().setPath('/examples/models/gltf/');
+_paper1Loader.load('paper.glb', function(gltf){
+    _paper3dmodel1 = gltf.scene;
+    _paper3dmodel1.scale.set(.015,.015,.015);
+    _paper3dmodel1.position.set(-18.6,0,-63);
+
+    _scene.add(_paper3dmodel1);
+});
+
+//note 2
+var _paper3dmodel2;
+const _paper2Loader = new GLTFLoader().setPath('/examples/models/gltf/');
+_paper2Loader.load('paper.glb', function(gltf){
+    _paper3dmodel2 = gltf.scene;
+    _paper3dmodel2.scale.set(.015,.015,.015);
+    _paper3dmodel2.position.set(15,0,-136);
+    _paper3dmodel2.rotation.y = dtr(-40);
+
+    _scene.add(_paper3dmodel2);
+});
+
+//labratory
+var _lab3dmodel;
 const _labLoader = new GLTFLoader().setPath('/examples/models/gltf/');
     _labLoader.load('tunnel_lab.glb', function(gltf){
         //places, scales
         _lab3dmodel = gltf.scene;
         _lab3dmodel.scale.set(2.1,2.1,2.1),
-        _lab3dmodel.position.set(0,0,-8);
-        _scene.add(_lab3dmodel)
+        _lab3dmodel.position.set(9.6,0,-134);
+        _lab3dmodel.rotation.y = dtr(90);
+        _scene.add(_lab3dmodel);
     });
+
+
+//portal
+var _portal3dmodel;
+var _mixer;
+var _animationSetting = { speed: 1 };
+const _portalLoader = new GLTFLoader().setPath('/examples/models/gltf/');
+    _portalLoader.load('portal.glb', function (gltf) {
+        _portal3dmodel = gltf.scene;
+        _portal3dmodel.scale.set(3.5, 3.5, 3.5);
+        _portal3dmodel.position.set(0, -1.8, 15);
+    
+        //Animation setup
+    _mixer = new THREE.AnimationMixer(_portal3dmodel);
+    const _animations = gltf.animations;
+    if (_animations.length > 0) {
+        _mixer.clipAction(_animations[0]).play(); // Play the first animation
+    } else {
+        console.warn("No animations found in the portal model.");
+    }
+
+    // Loop through meshes to cast and receive shadows
+    _portal3dmodel.traverse(function (child) {
+        if (child.isMesh) {
+            child.castShadow = true;
+            child.receiveShadow = true;
+        }
+    });
+
+    // Add portal model to the scene after loading
+    _scene.add(_portal3dmodel);
+});
+
 
 gsap.ticker.add(animate);
 
 var _d = 0;//deltaratio
 
 // Movement parameters
-const moveSpeed = 100.0; // Units per second
+const moveSpeed = 600.0; // Units per second
 const friction = 10.0; // Friction coefficient
 
 // Velocity and direction vectors
 const velocity = new THREE.Vector3();
 const direction = new THREE.Vector3();
 
-// Clock to track time
+// Clock to track coordinates
 const clock = new THREE.Clock();
+function logCameraPosition() {
+    console.log(`Camera Position: X = ${_camera.position.x}, Y = ${_camera.position.y}, Z = ${_camera.position.z}`);
+}
+
+
 
 
 function animate(){
+    // Call the function in your render loop or where appropriate
+logCameraPosition();
         // Calculate delta ratio based on target FPS (60)
         _d = gsap.ticker.deltaRatio(60); // Ensures consistent movement speed
     
@@ -460,9 +572,12 @@ function animate(){
     
 
     _composer.render(); //render screen med effekter
-       
+
     _stats.update();
-}
+// Ensure _mixer is defined before updating it
+if (_mixer) {
+    _mixer.update(clock.getDelta() * _animationSetting.speed);
+}};
 
 
 //opsætte GUI
@@ -538,7 +653,7 @@ createPlanets();
 
 //init - sætter kameraet tilbage så man kan se scenen
 _camera.position.z = 10;
-_camera.position.y = 1.5;
+_camera.position.y = 2;
 
 //degree to radius - omregner til radian
 function dtr(d) {
