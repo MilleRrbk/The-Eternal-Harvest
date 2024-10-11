@@ -58,8 +58,6 @@ _audioLoader.load('/examples/sounds/alien_planet_echoes.mp3', function(buffer){
     _bgMusic.play(); //play audio
 });
 
-
-
 //Initialize PointerLockControls - allows the camera to capture the mouse movement, enabling the user to look around freely
 const _controls = new PointerLockControls(_camera, document.body);
 
@@ -83,6 +81,27 @@ _controls.addEventListener('unlock', () => {
     _blocker.style.display = 'block';
     _instructions.style.display = '';
 });
+
+//add sprite - crosshair
+// Load the crosshair texture
+const textureLoader = new THREE.TextureLoader();
+textureLoader.load('/examples/textures/crosshair.png', (texture) => {
+    // Create a sprite material with the loaded texture
+    const material = new THREE.SpriteMaterial({ map: texture });
+
+    // Create the sprite (crosshair)
+    const sprite = new THREE.Sprite(material);
+
+    // Set the scale for the crosshair
+    sprite.scale.set(0.05, 0.05, 1); // Adjust the size as needed
+
+    // Position the sprite in front of the camera
+    sprite.position.set(0, 0, -1); // Place it slightly in front of the camera
+
+    // Add the sprite to the camera
+    _camera.add(sprite); // Attach the sprite to the camera
+});
+
 
 const _velocity = new THREE.Vector3();
 const _cameraDirection = new THREE.Vector3();
@@ -198,6 +217,10 @@ _floor.position.z = -370;
 
 _floor.receiveShadow = true;
 _scene.add(_floor);
+
+const _raycaster = new THREE.Raycaster();
+const _pointer = new THREE.Vector2(); //konverterer til x og y koordinat
+
 
 //sun sphere
 function buildSphere(x,y,z) {
@@ -322,27 +345,21 @@ shrekLoader.load('alien_plant_shrek.glb', function (gltf) {
 //mushrooms
 const mushroomLoader = new GLTFLoader().setPath('/examples/models/gltf/');
 const positions = [
-    { x: -10, z: -20 },
-    { x: 15, z: 5 },
-    { x: -30, z: 12 },
-    { x: 25, z: -25 },
-    { x: 0, z: -30 },
-    { x: 5, z: 10 },
-    { x: -15, z: 15 },
-    { x: 20, z: -10 },
-    { x: -5, z: -5 },
-    { x: 10, z: -15 },
-    { x: 30, z: 20 },
-    { x: -25, z: 25 },
-    { x: 10, z: 10 },
-    { x: -20, z: -20 },
-    { x: 15, z: 0 },
-    { x: 0, z: 20 },
-    { x: -10, z: 10 },
-    { x: 25, z: -5 },
-    { x: 10, z: -30 },
-    { x: -5, z: 5 },
-    { x: 30, z: -20 },
+    { x: -9.1, z: -4.4 },
+    { x: 1.3, z: -30.8 },
+    { x: -7.3, z: -58.8 },
+    { x: -1.6, z: -93 },
+    { x: 12, z: -110 },
+    { x: -2.9, z: -124 },
+    { x: -16.7, z: -155.5 },
+    { x: 2.8, z: -190.2 },
+    { x: -20.7, z: -208.7 },
+    { x: -21.7, z: -189 },
+    { x: -9, z: -163.8 },
+    { x: 18, z: -135 },
+    { x: -24.7, z: -65 },
+    { x: 7.1, z: -45.3 },
+    { x: -6.6, z: -225.5 },
 ];
 mushroomLoader.load('magical_mushroom_blue.glb', function (gltf) {
     const mushroomModel = gltf.scene; // The loaded model
@@ -359,7 +376,9 @@ mushroomLoader.load('magical_mushroom_blue.glb', function (gltf) {
     for (const pos of positions) {
         const mushroomInstance = mushroomModel.clone(); // Clone the model
         mushroomInstance.position.set(pos.x, 1, pos.z); // Set the position
-        
+        // Assign a custom property to identify mushrooms
+        mushroomInstance.userData.type = 'mushroom';
+
         // Traverse the mushroom instance to apply the glowing material
         mushroomInstance.traverse((child) => {
             if (child.isMesh) {
@@ -371,6 +390,46 @@ mushroomLoader.load('magical_mushroom_blue.glb', function (gltf) {
         _scene.add(mushroomInstance); // Add to the scene
     }
 });
+
+//eventlistener for mouseclicks to remove mushrooms
+// Event listener for mouse clicks
+window.addEventListener('click', (e) => {
+    // Calculate mouse position in normalized device coordinates
+    _pointer.x = (e.clientX / window.innerWidth) * 2 - 1;
+    _pointer.y = - (e.clientY / window.innerHeight) * 2 + 1;
+
+    // Update raycaster with camera and mouse position
+    _raycaster.setFromCamera(_pointer, _camera);
+
+    // Calculate objects intersecting the raycaster
+    const _intersects = _raycaster.intersectObjects(_scene.children, true); // Set true to check all descendants
+
+    // Check if any objects were intersected
+    if (_intersects.length > 0) {
+        const _clickedObject = _intersects[0].object; // Get the first object you clicked on
+
+        // Check if the clicked object or any of its ancestors have the userData property
+        let mushroomFound = false;
+        
+        // Traverse up the hierarchy to find the mushroom instance
+        let currentObject = _clickedObject;
+        while (currentObject) {
+            if (currentObject.userData.type === 'mushroom') {
+                mushroomFound = true;
+                currentObject.parent.remove(currentObject);
+                console.log('Mushroom removed');
+                break;
+            }
+            currentObject = currentObject.parent;
+        }
+
+        if (!mushroomFound) {
+            console.log('Not a mushroom');
+        }
+    }
+});
+
+
 
 //grass with random positions
 loader.load('low_poly_grass.glb', function (gltf) {
@@ -393,6 +452,49 @@ loader.load('low_poly_grass.glb', function (gltf) {
         _scene.add(grassInstance);
     }
 });
+
+//ribcage1
+
+var _ribs3dmodel;
+const _ribsLoader = new GLTFLoader().setPath('/examples/models/gltf/');
+_ribsLoader.load('rib-cage.glb', function(gltf){
+    _ribs3dmodel = gltf.scene;
+    _ribs3dmodel.scale.set(30,30,30);
+    _ribs3dmodel.position.set(8.7,0,-31.5);
+    _ribs3dmodel.rotation.x = dtr(180);
+    _ribs3dmodel.rotation.y = dtr(40);
+
+    _scene.add(_ribs3dmodel);
+});
+
+//ribcage1 light
+const _ribsLight = new THREE.PointLight( 0xFF8100, 20 );
+_ribsLight.castShadow = true;
+_ribsLight.position.set( 8.7, -1, -31.5 );
+_ribsLight.shadow.mapSize.width = 512 * 4;
+_ribsLight.shadow.mapSize.height = 512 * 4;
+_scene.add( _ribsLight );
+
+
+//alien skull
+var _skull3dmodel;
+const _skullLoader = new GLTFLoader().setPath('/examples/models/gltf/');
+_ribsLoader.load('alien_skull.glb', function(gltf){
+    _skull3dmodel = gltf.scene;
+    _skull3dmodel.scale.set(.01,.01,.01);
+    _skull3dmodel.position.set(-18.6,0,-71.3);
+    _skull3dmodel.rotation.y = dtr(90);
+
+    _scene.add(_skull3dmodel);
+});
+//skull1 light
+const _skullLight = new THREE.PointLight( 0xFF8100, 10 );
+_skullLight.castShadow = true;
+_skullLight.position.set(-18.6,-1,-71.3);
+_skullLight.shadow.mapSize.width = 512 * 4;
+_skullLight.shadow.mapSize.height = 512 * 4;
+_scene.add( _skullLight );
+
 
 //satellite structure
 var _satellite3dmodel;
@@ -452,6 +554,48 @@ _paper1Loader.load('paper.glb', function(gltf){
 
     _scene.add(_paper3dmodel1);
 });
+//paper light
+const _paperLight = new THREE.PointLight( 0xFFFFFF, 2 );
+_paperLight.castShadow = true;
+_paperLight.position.set(-18.6,0,-63);
+_paperLight.shadow.mapSize.width = 512 * 4;
+_paperLight.shadow.mapSize.height = 512 * 4;
+_scene.add( _paperLight );
+
+const mouse = new THREE.Vector2(); // 2D vector to store normalized mouse coordinates
+const noteText1Div = document.getElementById('noteText');
+const noteText2Div = document.getElementById('noteText2');
+// Detect when a note is clicked
+function onMouseClick(event) {
+    // Update the mouse position in normalized coordinates
+    mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+    mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+    // Set raycaster based on mouse position
+    _raycaster.setFromCamera(mouse, _camera);
+
+    // Check for intersections with both notes
+    const intersectsNote1 = _raycaster.intersectObject(_paper3dmodel1);
+    const intersectsNote2 = _raycaster.intersectObject(_paper3dmodel2);
+
+    if (intersectsNote1.length > 0) {
+        // Show text for Note 1
+        noteText1Div.style.display = 'block';
+        noteText2Div.style.display = 'none'; // Ensure Note 2's text is hidden
+    } else if (intersectsNote2.length > 0) {
+        // Show text for Note 2
+        noteText2Div.style.display = 'block';
+        noteText1Div.style.display = 'none'; // Ensure Note 1's text is hidden
+    } else {
+        // Hide both texts if clicking elsewhere
+        noteText1Div.style.display = 'none';
+        noteText2Div.style.display = 'none';
+    }
+}
+
+// Add the click event listener
+window.addEventListener('click', onMouseClick);
+
 
 //note 2
 var _paper3dmodel2;
@@ -464,6 +608,13 @@ _paper2Loader.load('paper.glb', function(gltf){
 
     _scene.add(_paper3dmodel2);
 });
+//paper light2
+const _paperLight2 = new THREE.PointLight( 0xFFFFFF, 2 );
+_paperLight2.castShadow = true;
+_paperLight2.position.set(15,0,-136);
+_paperLight2.shadow.mapSize.width = 512 * 4;
+_paperLight2.shadow.mapSize.height = 512 * 4;
+_scene.add( _paperLight2 );
 
 //labratory
 var _lab3dmodel;
@@ -476,7 +627,25 @@ const _labLoader = new GLTFLoader().setPath('/examples/models/gltf/');
         _lab3dmodel.rotation.y = dtr(90);
         _scene.add(_lab3dmodel);
     });
-
+    
+    //covered body
+    var _covBod3dmodel;
+    const _covBodLoader = new GLTFLoader().setPath('/examples/models/gltf/');
+        _covBodLoader.load('covered_body.glb', function(gltf){
+            //places, scales
+            _covBod3dmodel = gltf.scene;
+            _covBod3dmodel.scale.set(1,1,1),
+            _covBod3dmodel.position.set(-30.9,0,-203.4);
+            _covBod3dmodel.rotation.y = dtr(60);
+            _scene.add(_covBod3dmodel);
+        });
+    //point light for covered body
+const _covBod1Light = new THREE.PointLight(0xffffff, 30);
+_covBod1Light.castShadow = true;
+_covBod1Light.position.set(-30.9,4,-203.4);
+_covBod1Light.shadow.mapSize.width = 512 * 4;
+_covBod1Light.shadow.mapSize.height = 512 * 4;
+_scene.add(_covBod1Light);
 
 //portal
 var _portal3dmodel;
@@ -515,7 +684,7 @@ gsap.ticker.add(animate);
 var _d = 0;//deltaratio
 
 // Movement parameters
-const moveSpeed = 600.0; // Units per second
+const moveSpeed = 500.0; // Units per second
 const friction = 10.0; // Friction coefficient
 
 // Velocity and direction vectors
@@ -533,7 +702,7 @@ function logCameraPosition() {
 
 function animate(){
     // Call the function in your render loop or where appropriate
-logCameraPosition();
+    logCameraPosition();
         // Calculate delta ratio based on target FPS (60)
         _d = gsap.ticker.deltaRatio(60); // Ensures consistent movement speed
     

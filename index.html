@@ -60,6 +60,20 @@
             cursor: pointer;
             user-select: none; /* Prevents text selection on double-click */
 }
+/* Styles for the text that appears when clicking the note */
+#noteText, #noteText2 {
+            position: absolute;
+            top: 10%;
+            left: 20%;
+            width: 60%;
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 20px;
+            font-family: 'VT323', monospace;
+            font-size: 20px;
+            display: none; /* Initially hidden */
+            z-index: 2;
+        }
         
     </style>
 </head>
@@ -73,6 +87,15 @@
 			 <u>Click to play</u>
         </div>
     </div>
+
+	 <!-- Note text overlay -->
+	 <div id="noteText">
+        This place should have living creatures, but the only thing left are the trees and mushrooms. It seems the harvest of mushrooms has taken a viable source of the planet's nutrients, so the creatures didn’t survive.
+    </div>
+	<!-- Note text overlay for Note 2 -->
+<div id="noteText2">
+    Something is terribly wrong. We arrived with hope, but now time slips through my fingers like sand. I’ve lost track of how long we’ve been here. It's like this place is telling us to leave, but it's too late for us now. Go home while you still can!
+</div>
     
     <!-- Three.js Canvas -->
     <canvas id="three"></canvas> 
