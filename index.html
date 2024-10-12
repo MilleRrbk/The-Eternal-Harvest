@@ -61,16 +61,20 @@
             user-select: none; /* Prevents text selection on double-click */
 }
 /* Styles for the text that appears when clicking the note */
-#noteText, #noteText2 {
+#noteText, #noteText2, #noteText3 {
+			font-family: 'VT323', monospace;
             position: absolute;
-            top: 10%;
-            left: 20%;
-            width: 60%;
-            background-color: rgba(0, 0, 0, 0.7);
+            font-size: 24px;
+			line-height: 1.7;
             color: white;
-            padding: 20px;
-            font-family: 'VT323', monospace;
-            font-size: 20px;
+			background-color: rgba(0, 18, 19, 0.54);
+            text-align: center;
+			padding-left: 10vw;
+    		padding-right: 10vw; 
+    		padding-top: 1vw; 
+    		padding-bottom: 1vw; 
+			margin: 7%;
+            cursor: pointer;
             display: none; /* Initially hidden */
             z-index: 2;
         }
@@ -90,11 +94,14 @@
 
 	 <!-- Note text overlay -->
 	 <div id="noteText">
-        This place should have living creatures, but the only thing left are the trees and mushrooms. It seems the harvest of mushrooms has taken a viable source of the planet's nutrients, so the creatures didn’t survive.
+        This place should have living creatures, but the only thing left are the trees and mushrooms. <br><br>It seems our harvest has taken a viable source of the planet's nutrients, so the creatures didn’t survive. <br><br>We have taken all the lives here on Vitalis.
     </div>
 	<!-- Note text overlay for Note 2 -->
 <div id="noteText2">
-    Something is terribly wrong. We arrived with hope, but now time slips through my fingers like sand. I’ve lost track of how long we’ve been here. It's like this place is telling us to leave, but it's too late for us now. Go home while you still can!
+    Something is terribly wrong. We arrived with hope, but now time slips through our fingers like sand. <br><br> We can no longer remember when we arrivied or how long we've been here! <br><br> It's like this place is telling us to leave, but it's too late for us now. <br><br> Did the mushrooms do this to us?
+</div>
+<div id="noteText3">
+    The mushrooms... they promised immortality, but instead they devour us. <br><br>We are the harvest, feeding their endless hunger. <br><br>They weren't meant for us, but for the creatures once living here... <br><br>Our fate is sealed, but you still have a choice.
 </div>
     
     <!-- Three.js Canvas -->

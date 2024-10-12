@@ -14,11 +14,7 @@ import {TextGeometry} from '/examples/jsm/geometries/TextGeometry.js';
 import * as ThreeObjects from '/js/modules/ThreeObjects.js';
 import InteractiveCube from '/js/modules/InteractiveCube.js';
 import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js'
-import {ColladaLoader} from 'three/addons/loaders/ColladaLoader.js';
-import {GlitchPass} from '/examples/jsm/postprocessing/GlitchPass.js';
 import {FilmPass} from '/examples/jsm/postprocessing/FilmPass.js';
-import {AfterimagePass} from '/examples/jsm/postprocessing/AfterimagePass.js';
-import {FirstPersonControls} from '/examples/jsm/controls/FirstPersonControls.js';
 import {PointerLockControls} from '/examples/jsm/controls/PointerLockControls.js';
 
 var _canvasEl = document.getElementById("three");
@@ -26,7 +22,6 @@ var _canvasEl = document.getElementById("three");
 //sæt størrelse
 var _vw = window.innerWidth;
 var _vh = window.innerHeight;
-
 
 //create a scene - camera
 // Opretter et kamera med et perspektivisk view (50 graders field of view, 
@@ -102,7 +97,6 @@ textureLoader.load('/examples/textures/crosshair.png', (texture) => {
     _camera.add(sprite); // Attach the sprite to the camera
 });
 
-
 const _velocity = new THREE.Vector3();
 const _cameraDirection = new THREE.Vector3();
 const _moveSpeed = 400.0; 
@@ -170,24 +164,12 @@ _composer.addPass(_renderPass);
 const _bloomPass = new UnrealBloomPass(new THREE.Vector2(_vw, _vh), .5,1,0);
 _composer.addPass(_bloomPass)
 
-//glitch effect
-// const _glitchPass = new GlitchPass();
-// // _glitchPass.goWild = true;
-// _composer.addPass(_glitchPass)
-
 //noise
 const _filmEffect = new FilmPass();
 _composer.addPass(_filmEffect);
 
-// const _afterimagePass = new AfterimagePass();
-// _composer.addPass(_afterimagePass);
-
 var _stats = new Stats();
 document.body.appendChild(_stats.dom); //ligger i DOM / html-dokumnetet
-
-//visualiser x,y og z axis
-const _axeshelper = new THREE.AxesHelper(2);
-_scene.add(_axeshelper);
 
 //tilføj generel lyskilde
 const _ambiLight = new THREE.AmbientLight(0xffffff, 0.4); //ambient light giver lys over det hele
@@ -353,7 +335,7 @@ const positions = [
     { x: -2.9, z: -124 },
     { x: -16.7, z: -155.5 },
     { x: 2.8, z: -190.2 },
-    { x: -20.7, z: -208.7 },
+    { x: -29, z: -206.7 },
     { x: -21.7, z: -189 },
     { x: -9, z: -163.8 },
     { x: 18, z: -135 },
@@ -392,7 +374,6 @@ mushroomLoader.load('magical_mushroom_blue.glb', function (gltf) {
 });
 
 //eventlistener for mouseclicks to remove mushrooms
-// Event listener for mouse clicks
 window.addEventListener('click', (e) => {
     // Calculate mouse position in normalized device coordinates
     _pointer.x = (e.clientX / window.innerWidth) * 2 - 1;
@@ -429,8 +410,6 @@ window.addEventListener('click', (e) => {
     }
 });
 
-
-
 //grass with random positions
 loader.load('low_poly_grass.glb', function (gltf) {
     const grassModel = gltf.scene;
@@ -454,7 +433,6 @@ loader.load('low_poly_grass.glb', function (gltf) {
 });
 
 //ribcage1
-
 var _ribs3dmodel;
 const _ribsLoader = new GLTFLoader().setPath('/examples/models/gltf/');
 _ribsLoader.load('rib-cage.glb', function(gltf){
@@ -475,11 +453,28 @@ _ribsLight.shadow.mapSize.width = 512 * 4;
 _ribsLight.shadow.mapSize.height = 512 * 4;
 _scene.add( _ribsLight );
 
+//pile of bones
+var _bones3dmodel;
+const _bonesLoader = new GLTFLoader().setPath('/examples/models/gltf/');
+_bonesLoader.load('bone_pile.glb', function(gltf){
+    _bones3dmodel = gltf.scene;
+    _bones3dmodel.scale.set(.04,.04,.04);
+    _bones3dmodel.position.set(-15,0,-163.1);
+
+    _scene.add(_bones3dmodel);
+});
+//pile of bones light
+const _pileBonesLight = new THREE.PointLight( 0xFF8100, 20 );
+_pileBonesLight.castShadow = true;
+_pileBonesLight.position.set(-15,-1,-163.1);
+_pileBonesLight.shadow.mapSize.width = 512 * 4;
+_pileBonesLight.shadow.mapSize.height = 512 * 4;
+_scene.add( _pileBonesLight );
 
 //alien skull
 var _skull3dmodel;
 const _skullLoader = new GLTFLoader().setPath('/examples/models/gltf/');
-_ribsLoader.load('alien_skull.glb', function(gltf){
+_skullLoader.load('alien_skull.glb', function(gltf){
     _skull3dmodel = gltf.scene;
     _skull3dmodel.scale.set(.01,.01,.01);
     _skull3dmodel.position.set(-18.6,0,-71.3);
@@ -495,6 +490,25 @@ _skullLight.shadow.mapSize.width = 512 * 4;
 _skullLight.shadow.mapSize.height = 512 * 4;
 _scene.add( _skullLight );
 
+//human skeleton
+var _skeleton3dmodel;
+const _skeletonLoader = new GLTFLoader().setPath('/examples/models/gltf/');
+_skeletonLoader.load('human_skeleton.glb', function(gltf){
+    _skeleton3dmodel = gltf.scene;
+    _skeleton3dmodel.scale.set(.06,.06,.06);
+    _skeleton3dmodel.position.set(7.3,.2,-125.8);
+    _skeleton3dmodel.rotation.x = dtr(-90);
+    _skeleton3dmodel.rotation.z = dtr(-20);
+
+    _scene.add(_skeleton3dmodel);
+});
+//point light for skeleton
+const _skeletonLight = new THREE.PointLight(0xffffff, 20);
+_skeletonLight.castShadow = true;
+_skeletonLight.position.set(7.3,4,-125.8);
+_skeletonLight.shadow.mapSize.width = 512 * 4;
+_skeletonLight.shadow.mapSize.height = 512 * 4;
+_scene.add(_skeletonLight);
 
 //satellite structure
 var _satellite3dmodel;
@@ -519,6 +533,14 @@ _controlroomLoader.load('controlroom.glb', function(gltf){
 
     _scene.add(_controlroom3dmodel);
 });
+
+//control room light
+const _ctrRoomLight = new THREE.PointLight( 0xFFFFFF, 2 );
+_ctrRoomLight.castShadow = true;
+_ctrRoomLight.position.set(-25.9,1.5,-213.7);
+_ctrRoomLight.shadow.mapSize.width = 512 * 4;
+_ctrRoomLight.shadow.mapSize.height = 512 * 4;
+_scene.add( _ctrRoomLight );
 
 //chair
 var _chair3dmodel;
@@ -554,6 +576,7 @@ _paper1Loader.load('paper.glb', function(gltf){
 
     _scene.add(_paper3dmodel1);
 });
+
 //paper light
 const _paperLight = new THREE.PointLight( 0xFFFFFF, 2 );
 _paperLight.castShadow = true;
@@ -565,6 +588,7 @@ _scene.add( _paperLight );
 const mouse = new THREE.Vector2(); // 2D vector to store normalized mouse coordinates
 const noteText1Div = document.getElementById('noteText');
 const noteText2Div = document.getElementById('noteText2');
+const noteText3Div = document.getElementById('noteText3');
 // Detect when a note is clicked
 function onMouseClick(event) {
     // Update the mouse position in normalized coordinates
@@ -577,25 +601,35 @@ function onMouseClick(event) {
     // Check for intersections with both notes
     const intersectsNote1 = _raycaster.intersectObject(_paper3dmodel1);
     const intersectsNote2 = _raycaster.intersectObject(_paper3dmodel2);
+    const intersectsNote3 = _raycaster.intersectObject(_controlroom3dmodel);
 
     if (intersectsNote1.length > 0) {
         // Show text for Note 1
         noteText1Div.style.display = 'block';
         noteText2Div.style.display = 'none'; // Ensure Note 2's text is hidden
+        noteText3Div.style.display = 'none';
     } else if (intersectsNote2.length > 0) {
         // Show text for Note 2
         noteText2Div.style.display = 'block';
         noteText1Div.style.display = 'none'; // Ensure Note 1's text is hidden
+        noteText3Div.style.display = 'none';
+        
+    } else if (intersectsNote3.length > 0) {
+        // Show text for Note 2
+        noteText3Div.style.display = 'block';
+        noteText1Div.style.display = 'none'; // Ensure Note 1's text is hidden
+        noteText2Div.style.display = 'none';
+        
     } else {
         // Hide both texts if clicking elsewhere
         noteText1Div.style.display = 'none';
         noteText2Div.style.display = 'none';
+        noteText3Div.style.display = 'none';
     }
 }
 
 // Add the click event listener
 window.addEventListener('click', onMouseClick);
-
 
 //note 2
 var _paper3dmodel2;
@@ -608,6 +642,7 @@ _paper2Loader.load('paper.glb', function(gltf){
 
     _scene.add(_paper3dmodel2);
 });
+
 //paper light2
 const _paperLight2 = new THREE.PointLight( 0xFFFFFF, 2 );
 _paperLight2.castShadow = true;
@@ -640,7 +675,7 @@ const _labLoader = new GLTFLoader().setPath('/examples/models/gltf/');
             _scene.add(_covBod3dmodel);
         });
     //point light for covered body
-const _covBod1Light = new THREE.PointLight(0xffffff, 30);
+const _covBod1Light = new THREE.PointLight(0xffffff, 20);
 _covBod1Light.castShadow = true;
 _covBod1Light.position.set(-30.9,4,-203.4);
 _covBod1Light.shadow.mapSize.width = 512 * 4;
@@ -655,7 +690,7 @@ const _portalLoader = new GLTFLoader().setPath('/examples/models/gltf/');
     _portalLoader.load('portal.glb', function (gltf) {
         _portal3dmodel = gltf.scene;
         _portal3dmodel.scale.set(3.5, 3.5, 3.5);
-        _portal3dmodel.position.set(0, -1.8, 15);
+        _portal3dmodel.position.set(0, -1.8, 7);
     
         //Animation setup
     _mixer = new THREE.AnimationMixer(_portal3dmodel);
@@ -696,8 +731,6 @@ const clock = new THREE.Clock();
 function logCameraPosition() {
     console.log(`Camera Position: X = ${_camera.position.x}, Y = ${_camera.position.y}, Z = ${_camera.position.z}`);
 }
-
-
 
 
 function animate(){
@@ -747,21 +780,6 @@ function animate(){
 if (_mixer) {
     _mixer.update(clock.getDelta() * _animationSetting.speed);
 }};
-
-
-//opsætte GUI
-// const gui = new GUI();
-
-//create folder for camera
-// const _folderca = gui.addFolder("Camera position");
-// _folderca.add(_camera.position,'x',-10,10,.1);
-// _folderca.add(_camera.position,'y',-10,10,.1);
-// _folderca.add(_camera.position,'z',-10,10,.1);
-
-// const _folderrca = gui.addFolder("Camera rotation");
-// _folderrca.add(_camera.rotation,'x', dtr(-180), dtr(180), .01);
-// _folderrca.add(_camera.rotation,'y', dtr(-180), dtr(180), .01);
-// _folderrca.add(_camera.rotation,'z', dtr(-180), dtr(180), .01);
 
 //stars
 function createStars(){
@@ -817,20 +835,18 @@ function createPlanets() {
 }
 
 }
-
 createPlanets();
 
-//init - sætter kameraet tilbage så man kan se scenen
+//initial camera position
 _camera.position.z = 10;
-_camera.position.y = 2;
+_camera.position.y = 3;
 
-//degree to radius - omregner til radian
+//degree to radiann
 function dtr(d) {
     return d * (Math.PI/180);
 }
 
-
-//når denne function er kaldt, bliver værdierne opdateret
+//calls function when window is resized
 function resized(e){
     var _vw = window.innerWidth;
     var _vh = window.innerHeight;
@@ -841,5 +857,5 @@ function resized(e){
     _renderer.setSize(_vw,_vh);
 }
 
-window.addEventListener("resize", resized); // Lytter til ændringer i skærmstørrelsen (resize) og kalder resized-funktionen
-resized(null); // Kalder resized for første gang, så størrelsen er korrekt fra starten
+window.addEventListener("resize", resized); // Listens to changes in screen size - called resized-function
+resized(null); // calls resized from the start  to have a correct size
