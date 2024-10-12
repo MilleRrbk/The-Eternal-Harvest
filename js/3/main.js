@@ -1,18 +1,10 @@
 import * as THREE from 'three';
-import {OrbitControls} from '/examples/jsm/controls/OrbitControls.js'; //styrer kamera
-import GUI from 'lil-gui';
 import Stats from 'three/addons/libs/stats.module.js'; //viser performance FPS
 //model for post processing
 import {EffectComposer} from '/examples/jsm/postprocessing/EffectComposer.js';
 import {RenderPass} from '/examples/jsm/postprocessing/RenderPass.js';
 import {UnrealBloomPass} from 'three/addons/postprocessing/UnrealBloomPass.js';
-
-import {Reflector} from '/examples/jsm/objects/Reflector.js';
-import {FontLoader} from '/examples/jsm/loaders/FontLoader.js';
-import {TextGeometry} from '/examples/jsm/geometries/TextGeometry.js';
-//egne moduler
 import * as ThreeObjects from '/js/modules/ThreeObjects.js';
-import InteractiveCube from '/js/modules/InteractiveCube.js';
 import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js'
 import {FilmPass} from '/examples/jsm/postprocessing/FilmPass.js';
 import {PointerLockControls} from '/examples/jsm/controls/PointerLockControls.js';
@@ -99,7 +91,7 @@ textureLoader.load('/examples/textures/crosshair.png', (texture) => {
 
 const _velocity = new THREE.Vector3();
 const _cameraDirection = new THREE.Vector3();
-const _moveSpeed = 400.0; 
+const _moveSpeed = 10.0; 
 const _friction = 10.0;
 
 // Create an object to track which keys are being pressed
@@ -169,7 +161,7 @@ const _filmEffect = new FilmPass();
 _composer.addPass(_filmEffect);
 
 var _stats = new Stats();
-document.body.appendChild(_stats.dom); //ligger i DOM / html-dokumnetet
+document.body.appendChild(_stats.dom); //ligger i DOM / html-dokumnete
 
 //tilføj generel lyskilde
 const _ambiLight = new THREE.AmbientLight(0xffffff, 0.4); //ambient light giver lys over det hele
@@ -410,27 +402,27 @@ window.addEventListener('click', (e) => {
     }
 });
 
-//grass with random positions
-loader.load('low_poly_grass.glb', function (gltf) {
-    const grassModel = gltf.scene;
-    grassModel.scale.set(0.006, 0.006, 0.006); // Adjusted scale
+// //grass with random positions
+// loader.load('low_poly_grass.glb', function (gltf) {
+//     const grassModel = gltf.scene;
+//     grassModel.scale.set(0.006, 0.006, 0.006); // Adjusted scale
 
-    const numGrass = 100;
+//     const numGrass = 100;
 
-    for (let i = 0; i < numGrass; i++) {
-        // Generate fully random positions without a seed
-        const _x = Math.random() * 100 - 50; // Random x value within the range
-        const _z = Math.random() * 300 - 270;      // Random z value within the range
-        const y = -4; // Grass should be placed on the ground, so y is set to 0
+//     for (let i = 0; i < numGrass; i++) {
+//         // Generate fully random positions without a seed
+//         const _x = Math.random() * 100 - 50; // Random x value within the range
+//         const _z = Math.random() * 300 - 270;      // Random z value within the range
+//         const y = -4; // Grass should be placed on the ground, so y is set to 0
 
-        // Clone the grass model and place it at the generated position
-        const grassInstance = grassModel.clone();
-        grassInstance.position.set(_x, y, _z);
+//         // Clone the grass model and place it at the generated position
+//         const grassInstance = grassModel.clone();
+//         grassInstance.position.set(_x, y, _z);
 
-        // Add the grass instance to the scene
-        _scene.add(grassInstance);
-    }
-});
+//         // Add the grass instance to the scene
+//         _scene.add(grassInstance);
+//     }
+// });
 
 //ribcage1
 var _ribs3dmodel;
@@ -452,24 +444,6 @@ _ribsLight.position.set( 8.7, -1, -31.5 );
 _ribsLight.shadow.mapSize.width = 512 * 4;
 _ribsLight.shadow.mapSize.height = 512 * 4;
 _scene.add( _ribsLight );
-
-//pile of bones
-var _bones3dmodel;
-const _bonesLoader = new GLTFLoader().setPath('/examples/models/gltf/');
-_bonesLoader.load('bone_pile.glb', function(gltf){
-    _bones3dmodel = gltf.scene;
-    _bones3dmodel.scale.set(.04,.04,.04);
-    _bones3dmodel.position.set(-15,0,-163.1);
-
-    _scene.add(_bones3dmodel);
-});
-//pile of bones light
-const _pileBonesLight = new THREE.PointLight( 0xFF8100, 20 );
-_pileBonesLight.castShadow = true;
-_pileBonesLight.position.set(-15,-1,-163.1);
-_pileBonesLight.shadow.mapSize.width = 512 * 4;
-_pileBonesLight.shadow.mapSize.height = 512 * 4;
-_scene.add( _pileBonesLight );
 
 //alien skull
 var _skull3dmodel;
@@ -728,14 +702,8 @@ const direction = new THREE.Vector3();
 
 // Clock to track coordinates
 const clock = new THREE.Clock();
-function logCameraPosition() {
-    console.log(`Camera Position: X = ${_camera.position.x}, Y = ${_camera.position.y}, Z = ${_camera.position.z}`);
-}
-
 
 function animate(){
-    // Call the function in your render loop or where appropriate
-    logCameraPosition();
         // Calculate delta ratio based on target FPS (60)
         _d = gsap.ticker.deltaRatio(60); // Ensures consistent movement speed
     
