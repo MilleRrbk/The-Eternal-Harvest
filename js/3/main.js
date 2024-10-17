@@ -160,8 +160,6 @@ _composer.addPass(_bloomPass)
 const _filmEffect = new FilmPass();
 _composer.addPass(_filmEffect);
 
-var _stats = new Stats();
-document.body.appendChild(_stats.dom); //ligger i DOM / html-dokumnete
 
 //tilføj generel lyskilde
 const _ambiLight = new THREE.AmbientLight(0xffffff, 0.4); //ambient light giver lys over det hele
