@@ -741,7 +741,6 @@ function animate(){
 
     _composer.render(); //render screen med effekter
 
-    _stats.update();
 // Ensure _mixer is defined before updating it
 if (_mixer) {
     _mixer.update(clock.getDelta() * _animationSetting.speed);
